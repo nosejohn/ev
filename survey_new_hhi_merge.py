@@ -26,5 +26,42 @@ def categorize_income(row):
     else:
         return 'High'
 
+# First, ensure your categorization function is applied to create 'new_hhi_cat'
 merged_df['new_hhi_cat'] = merged_df.apply(categorize_income, axis=1)
 
+# Use pd.get_dummies to convert 'new_hhi_cat' into binary variables
+hhi_dummies = pd.get_dummies(merged_df['new_hhi_cat'], prefix='hhi')
+
+# Concatenate these binary variables back to your original dataframe
+merged_df = pd.concat([merged_df, hhi_dummies], axis=1)
+
+merged_df['new_hhi_cat'] = merged_df.apply(categorize_income, axis=1)
+
+
+def categorize_income2(row):
+    # Check if either value is NA (using pd.isna for compatibility with pandas NAs)
+    if pd.isna(row['income_midpoint']) or row['income_midpoint'] == "NA":
+        return 'Prefer_not_to_say'  # or any other designation you prefer for missing income data
+    elif row['income_midpoint'] < 0.5 * row['state_median_hhi']:
+        return 'Low'
+    elif row['income_midpoint'] < 0.8 * row['state_median_hhi']:
+        return 'Low_Moderate'
+    elif row['income_midpoint'] < 1.2 * row['state_median_hhi']:
+        return 'Mid'
+    else:
+        return 'High'
+
+# new hhi cat2 uses four-income categories
+merged_df['new_hhi_cat2'] = merged_df.apply(categorize_income2, axis=1)
+
+
+# First, ensure your categorization function is applied to create 'new_hhi_cat'
+merged_df['new_hhi_cat2'] = merged_df.apply(categorize_income2, axis=1)
+
+# Use pd.get_dummies to convert 'new_hhi_cat' into binary variables
+hhi_dummies2 = pd.get_dummies(merged_df['new_hhi_cat2'], prefix='hhi2')
+
+# Concatenate these binary variables back to your original dataframe
+merged_df = pd.concat([merged_df, hhi_dummies2], axis=1)
+
+merged_df.to_csv("EV_survey_0223.csv", index_col = False)
